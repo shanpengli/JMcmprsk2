@@ -15,6 +15,7 @@
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_sort_vector.h>
+#include <chrono>
 
 namespace jmcspace {
  int GetCov(
@@ -1180,6 +1181,7 @@ namespace jmcspace {
 	const std::vector<double> ws
 )
 {
+  //auto start = std::chrono::high_resolution_clock::now();
   int p1=beta->size;
   int p2=gamma->size2;
   int g =gamma->size1;
@@ -1221,6 +1223,7 @@ namespace jmcspace {
       gsl_vector * bi = gsl_vector_alloc(p1a);
       gsl_matrix * bs = gsl_matrix_alloc(p1a,p1a);
       //sort FUNE_new
+      //auto start = std::chrono::high_resolution_clock::now();
       int index1;
       for (j=0;j<k;j++)
       {
@@ -1289,7 +1292,7 @@ namespace jmcspace {
       *sigma=*sigma/(double)n1;
       /* calculate H01 H02 */
     double dem,num;
-
+    //auto start = std::chrono::high_resolution_clock::now();
     int risk1_index=a-1;
     int risk2_index=b-1;
     dem=0;
@@ -1403,8 +1406,12 @@ namespace jmcspace {
         }
      else continue;
     }
-
     /*
+    auto finish = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = finish - start;
+    std::cout << "Elapsed time: " << elapsed.count() << " s\n";
+    */
+   /*
     for(p=0;p<a;p++)
     {
         dem=0;
@@ -1439,7 +1446,7 @@ namespace jmcspace {
         }
         gsl_matrix_set(H02,2,p,gsl_matrix_get(H02,1,p)/dem);
     }
-    */
+*/
 
 
       /* calculate gamma */
@@ -1831,10 +1838,12 @@ Rcpp::List jmc_cmain(int k, int n1,int p1,int p2, int maxl, int p1a, int maxiter
   gsl_permutation * perm = gsl_permutation_alloc(k);
   gsl_permutation * rank = gsl_permutation_alloc(k);
   //return rank index
+  //auto start = std::chrono::high_resolution_clock::now();
   gsl_matrix_get_col(p, C, 0);
   gsl_sort_vector_index(perm, p);
   gsl_permutation_inverse(rank, perm);
   //create C_new matrix
+  //auto start = std::chrono::high_resolution_clock::now();
   int index;
   for (j=0;j<k;j++)
   {
@@ -1842,6 +1851,7 @@ Rcpp::List jmc_cmain(int k, int n1,int p1,int p2, int maxl, int p1a, int maxiter
     index = k - 1 - (int) gsl_permutation_get(rank, j);
     gsl_matrix_set_row(C_new, index, pi);
   }
+
   //double loglike;
   iter=0;
   do
